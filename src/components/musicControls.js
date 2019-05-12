@@ -11,6 +11,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import LibraryMusic from '@material-ui/icons/LibraryMusic';
+import ReactAplayer from 'react-aplayer';
 
 const styles = {
   list: {
@@ -24,36 +25,72 @@ const styles = {
 class MusicControlPanel extends React.Component {
   state = {
     top: false,
-    left: false,
-    bottom: false,
-    right: false,
   };
 
-  toggleDrawer = (side, open) => () => {
+  togglePanel = (side, open) => () => {
     this.setState({
       [side]: open,
     });
   };
 
+  onInit = ap => {
+    window.audioPlayer = ap;
+  };
+
+  onPlay = () => {
+    console.log('on play');
+  };
+
+  onPause = () => {
+    console.log('on pause');
+  };
+
+  playerSettings = {
+    theme: '#F57F17',
+    lrcType: 3,
+    audio: [
+      {
+        name: 'artcore JINJA',
+        artist: 'An',
+        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/jinja.mp3',
+        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/jinja.jpg?raw=true',
+        lrc: '',
+        theme: '#ebd0c2'
+      },
+      {
+        name: 'Marigold feat. Guriri',
+        artist: 'M2U',
+        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/marigold.mp3',
+        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
+        lrc: '',
+        theme: '#ebd0c2'
+      }
+    ]
+  };
+
   render() {
-    const { classes } = this.props;
 
     const fullList = (
-      <div className={classes.fullList}>
-        woo
+      <div className={'fullList'}>
+        <ReactAplayer
+          {...this.playerSettings}
+          onInit={this.onInit}
+          onPlay={this.onPlay}
+          onPause={this.onPause}
+        />
       </div>
     );
 
     return (
       <div>
-        <Button onClick={this.toggleDrawer('top', true)}><LibraryMusic/></Button>
-       
-        <Drawer anchor="top" open={this.state.top} onClose={this.toggleDrawer('top', false)}>
+        <Button onClick={this.togglePanel('top', true)}><LibraryMusic /></Button>
+
+        <Drawer anchor="top" open={this.state.top} onClose={this.togglePanel('top', false)}>
           <div
             tabIndex={0}
             role="button"
-           //onClick={this.toggleDrawer('top', false)}
-            //onKeyDown={this.toggleDrawer('top', false)}
+          //onClick={this.togglePanel('top', false)}
+          //onKeyDown={this.togglePanel('top', false)}
           >
             {fullList}
           </div>
@@ -67,4 +104,4 @@ MusicControlPanel.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(MusicControlPanel);
+export default MusicControlPanel;
