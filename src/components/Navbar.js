@@ -22,13 +22,13 @@ const styles = {
 };
 
 function Navbar(props) {
-  const { classes, history } = props;
+  const { classes, history, requestColorTheme } = props;
 
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
-          <MusicControlPanel />
+          <MusicControlPanel requestColorTheme={requestColorTheme}/>
           <Typography variant="h6" color="inherit">
             Bruh
           </Typography>

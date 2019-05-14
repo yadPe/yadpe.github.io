@@ -37,6 +37,7 @@ class MusicControlPanel extends React.Component {
   };
 
   onInit = ap => {
+    const { requestColorTheme } = this.props;
     //this.colorThief = new ColorThief();
     this.ap = ap;
     window.audioPlayer = ap;
@@ -50,9 +51,12 @@ class MusicControlPanel extends React.Component {
     // };
 
     // setTheme(ap.list.index);
-    // ap.on('listswitch', (data) => {
-    //   setTheme(data.index);
-    // });
+    ap.on('listswitch', (data) => {
+      console.log(ap.list.audios[data.index].theme);
+      requestColorTheme(ap.list.audios[data.index].theme);
+      //setTheme(data.index);
+      //ap.theme(ap.list.audios[data.index].theme)
+    });
   };
 
   onPlay = (e) => {
@@ -82,7 +86,7 @@ class MusicControlPanel extends React.Component {
         url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/jinja.mp3',
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/jinja.jpg?raw=true',
         lrc: '',
-        theme: '#ebd0c2'
+        theme: 'rgb(163, 136, 100)'
       },
       {
         name: 'Marigold feat. Guriri',
@@ -90,15 +94,15 @@ class MusicControlPanel extends React.Component {
         url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/marigold.mp3',
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
         lrc: '',
-        theme: '#ebd0c2'
+        theme: 'rgb(241, 228, 199)'
       },
       {
         name: 'Routing',
         artist: 'Camellia',
-        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/marigold.mp3',
-        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
+        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/routing.mp3',
+        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/routing.jpg?raw=true',
         lrc: '',
-        theme: '#ebd0c2'
+        theme: 'rgb(233, 192, 215)'
       }
     ]
   };
