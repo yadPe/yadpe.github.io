@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { NavLink, withRouter } from 'react-router-dom';
+import { compose } from 'recompose'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -20,7 +22,7 @@ const styles = {
 };
 
 function Navbar(props) {
-  const { classes } = props;
+  const { classes, history } = props;
 
   return (
     <div className={classes.root}>
@@ -30,12 +32,11 @@ function Navbar(props) {
           <Typography variant="h6" color="inherit">
             Bruh
           </Typography>
-
-            <Button>Project</Button>
-
+          <Button onClick={() => { history.push('/') }}>Home</Button>
+          <Button onClick={() => { history.push('/projects') }}>Project</Button>
+          <Button onClick={() => { history.push('/about') }}>About</Button>
         </Toolbar>
       </AppBar>
-
     </div >
   );
 }
@@ -44,4 +45,7 @@ Navbar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Navbar);
+export default compose(
+  withRouter,
+  withStyles(styles),
+)(Navbar);
