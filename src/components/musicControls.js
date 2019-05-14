@@ -10,8 +10,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import Typography from '@material-ui/core/Typography';
 import LibraryMusic from '@material-ui/icons/LibraryMusic';
 import ReactAplayer from 'react-aplayer';
+//import ColorThief from '../color-thief';
 
 const styles = {
   list: {
@@ -25,6 +27,7 @@ const styles = {
 class MusicControlPanel extends React.Component {
   state = {
     top: false,
+    nowPlaying: null,
   };
 
   togglePanel = (side, open) => () => {
@@ -34,15 +37,39 @@ class MusicControlPanel extends React.Component {
   };
 
   onInit = ap => {
+    //this.colorThief = new ColorThief();
+    this.ap = ap;
     window.audioPlayer = ap;
+
+    // this.setTheme = (index) => {
+    //   if (!ap.list.audios[index].theme) {
+    //     this.colorThief.getColor(ap.list.audios[index].cover, function (color) {
+    //       ap.theme(`rgb(${color[0]}, ${color[1]}, ${color[2]})`, index);
+    //     });
+    //   }
+    // };
+
+    // setTheme(ap.list.index);
+    // ap.on('listswitch', (data) => {
+    //   setTheme(data.index);
+    // });
   };
 
-  onPlay = () => {
+  onPlay = (e) => {
     console.log('on play');
+    const songName = this.ap.list.audios.filter(song => song.url === e.path[0].src)[0].name;
+    //console.log(np);
+    this.setState({
+      nowPlaying: songName,
+    })
+    this.np = e.path.src;
   };
 
   onPause = () => {
     console.log('on pause');
+    this.setState({
+      nowPlaying: null,
+    })
   };
 
   playerSettings = {
@@ -84,6 +111,9 @@ class MusicControlPanel extends React.Component {
     return (
       <div>
         <Button onClick={this.togglePanel('top', true)}><LibraryMusic /></Button>
+        <Typography>
+          {this.state.nowPlaying || null}
+        </Typography>
 
         <Drawer anchor="top" open={this.state.top} onClose={this.togglePanel('top', false)}>
           <div
