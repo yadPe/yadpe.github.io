@@ -91,6 +91,14 @@ class MusicControlPanel extends React.Component {
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
         lrc: '',
         theme: '#ebd0c2'
+      },
+      {
+        name: 'Routing',
+        artist: 'Camellia',
+        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/marigold.mp3',
+        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
+        lrc: '',
+        theme: '#ebd0c2'
       }
     ]
   };
