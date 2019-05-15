@@ -28,13 +28,14 @@ function Navbar(props) {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
-          <MusicControlPanel requestColorTheme={requestColorTheme}/>
+          
           <Typography variant="h6" color="inherit">
             Bruh
           </Typography>
           <Button onClick={() => { history.push('/') }}>Home</Button>
           <Button onClick={() => { history.push('/projects') }}>Project</Button>
-          <Button onClick={() => { history.push('/about') }}>About</Button>
+          <Button onClick={() => { history.push('/audiovisualizer') }}>About</Button>
+          <MusicControlPanel requestColorTheme={requestColorTheme}/>
         </Toolbar>
       </AppBar>
     </div >

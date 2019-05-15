@@ -1,0 +1,88 @@
+body{
+    overflow: hidden;
+}
+#visu{
+    overflow: hidden;
+    /* background-color: black; */
+    margin: 0;
+    color: #ffafe5;
+    cursor: auto;
+}
+#controls{
+    display: inline-block;
+    position: fixed; 
+    padding: 1em;
+}
+
+.background{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.filter{
+    z-index: -5;
+}
+
+.brightnessFilter{
+    position: absolute;
+    top: 0;
+    height: 100%;
+    overflow: visible;
+    z-index: -5;
+}
+
+#newBrightnessFilter{
+    filter: brightness(0.77);
+    /*background: radial-gradient(ellipse at 70%, transparent 60%, #fff);
+    opacity: 0;*/
+}
+
+#brightnessFilterLeft{
+    background: radial-gradient(ellipse at 35%, #fff 1%, transparent 70%, transparent);
+    left: -22%;
+    width: 44%;
+    opacity: 1;
+}
+
+#brightnessFilterRight{
+    right: -22%;
+    width: 44%;
+    opacity: 1;
+    background: radial-gradient(ellipse at 65%, #fff 1%, transparent 70%, transparent);
+}
+
+#background{
+    background-image: url("bg2.jpg");
+    /*background-image: url("https://i.ytimg.com/vi/CJe0rWOP4fE/maxresdefault.jpg");*/ 
+    /*background: #3f3f3f;*/
+    background-position: center;
+    background-size: cover;
+    /* opacity: 0.35; */
+    z-index: -10;
+    transform: scale(1.0);
+}
+
+#blurFilter{
+    filter: blur(0px);
+}
+
+#saturateFilter{
+    filter: saturate(1);
+    background: linear-gradient(to top,#fff -65%, transparent 37%, transparent);
+}
+
+img{
+    display: none;
+}
+
+#video{
+    visibility: visible;
+    z-index: -9;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+}

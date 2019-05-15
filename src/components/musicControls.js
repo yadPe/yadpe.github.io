@@ -15,6 +15,9 @@ import LibraryMusic from '@material-ui/icons/LibraryMusic';
 import ReactAplayer from 'react-aplayer';
 //import ColorThief from '../color-thief';
 
+const reqSongs = require.context('../assets', true, /\.mp3$/);
+const reqCovers = require.context('../assets', true, /\.jpg$/);
+
 const styles = {
   list: {
     width: 250,
@@ -42,6 +45,8 @@ class MusicControlPanel extends React.Component {
     this.ap = ap;
     window.audioPlayer = ap;
 
+    //console.log(reqSongs('./jinja.mp3', true))
+
     // this.setTheme = (index) => {
     //   if (!ap.list.audios[index].theme) {
     //     this.colorThief.getColor(ap.list.audios[index].cover, function (color) {
@@ -61,12 +66,15 @@ class MusicControlPanel extends React.Component {
 
   onPlay = (e) => {
     console.log('on play');
-    const songName = this.ap.list.audios.filter(song => song.url === e.path[0].src)[0].name;
-    //console.log(np);
+    console.log(e.path[0].src);
+    //const songName = this.ap.list.audios.filter(song => song.url === `http://localhost:3000${e.path[0].src}`)[0].name || 'unknown';
+    const songName = 'unknown';
+
     this.setState({
       nowPlaying: songName,
     })
     this.np = e.path.src;
+    window.playing = true;
   };
 
   onPause = () => {
@@ -83,7 +91,7 @@ class MusicControlPanel extends React.Component {
       {
         name: 'artcore JINJA',
         artist: 'An',
-        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/jinja.mp3',
+        url: reqSongs('./jinja.mp3', true),
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/jinja.jpg?raw=true',
         lrc: '',
         theme: 'rgb(163, 136, 100)'
@@ -91,7 +99,7 @@ class MusicControlPanel extends React.Component {
       {
         name: 'Marigold feat. Guriri',
         artist: 'M2U',
-        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/marigold.mp3',
+        url: reqSongs('./marigold.mp3', true),
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
         lrc: '',
         theme: 'rgb(241, 228, 199)'
@@ -99,7 +107,7 @@ class MusicControlPanel extends React.Component {
       {
         name: 'Routing',
         artist: 'Camellia',
-        url: 'https://raw.githubusercontent.com/yadPe/yadpe.github.io/master/src/assets/routing.mp3',
+        url: reqSongs('./routing.mp3', true),
         cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/routing.jpg?raw=true',
         lrc: '',
         theme: 'rgb(233, 192, 215)'
@@ -122,10 +130,12 @@ class MusicControlPanel extends React.Component {
 
     return (
       <div>
-        <Button onClick={this.togglePanel('top', true)}><LibraryMusic /></Button>
-        <Typography>
-          {this.state.nowPlaying || null}
-        </Typography>
+        <Button onClick={this.togglePanel('top', true)}>
+          <LibraryMusic />
+          <Typography>
+            {this.state.nowPlaying || null}
+          </Typography>
+        </Button>
 
         <Drawer anchor="top" open={this.state.top} onClose={this.togglePanel('top', false)}>
           <div
