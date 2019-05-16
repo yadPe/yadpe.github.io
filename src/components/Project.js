@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { NavLink, withRouter } from 'react-router-dom';
+import { compose } from 'recompose'
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -19,11 +21,12 @@ const styles = {
 };
 
 function MediaCard(props) {
-  const { classes, title, description, cover, link } = props;
+  const { classes, history, title, description, cover, link } = props;
   return (
     <Card className={classes.card}>
       <CardActionArea>
         <CardMedia
+        onClick={() => {history.push('/projects/audiovisualizer')}}
           className={classes.media}
           image={cover}
           title={title}
@@ -53,4 +56,7 @@ MediaCard.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(MediaCard);
+export default compose(
+  withRouter,
+  withStyles(styles),
+)(MediaCard);

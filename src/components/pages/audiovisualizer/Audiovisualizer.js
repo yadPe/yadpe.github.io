@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Particule, randomNum, convertRange } from './audiovisualizerUtils';
+import { Particule, randomNum, convertRange, overallLoudess } from './audiovisualizerUtils';
+import cursor from './cursor.png';
 import './style.css';
 
 class Audiovisualizer extends Component {
@@ -122,28 +123,21 @@ class Audiovisualizer extends Component {
     var lastRun;//performance.now();
     var lastFps = [];
     var x = 0;
-    //console.log(x);
-
 
     function averageFps(fpsArray) {
       var sum = 0;
       for (let i = 0; i < fpsArray.length; i++) {
         sum += parseInt(fpsArray[i]);
       }
-
       lastFps = [];
-
       return Math.round(sum / fpsArray.length)
-
     }
 
     var h; //hue
     var lastOverallLoudness; //loudness -100ms
     var deltaLoudness;
-    //req;
 
     this.animate = () => {
-
       // State and fps counter //
       if (!lastRun) {
         lastRun = performance.now();
@@ -182,7 +176,7 @@ class Audiovisualizer extends Component {
 
       // analyse frequency and make average by range  //
       window.analyser.getByteFrequencyData(dataArray);
-      overallLoudess(dataArray);
+      frequency = overallLoudess(dataArray);
       // Animate css elements
       updateBackground();
 
@@ -257,7 +251,6 @@ class Audiovisualizer extends Component {
           ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
         }
         else {
-          const ratio = 1;
           ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
           ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         }
@@ -265,95 +258,6 @@ class Audiovisualizer extends Component {
       }
       //draw Cursor 
       ctx.drawImage(cursor, clientPos.x - cursorSize / 2, clientPos.y - cursorSize / 2, cursorSize, cursorSize);
-    }
-
-    // Init
-    if (window.playing) {
-      if (window.audioCtx == undefined) {
-        window.audioCtx = new AudioContext();
-      }
-
-      if (window.MEDIA_ELEMENT_NODES.has(window.audioPlayer.audio)) {
-        this.src = window.MEDIA_ELEMENT_NODES.get(window.audioPlayer.audio);
-      } else {
-        this.src = window.audioCtx.createMediaElementSource(window.audioPlayer.audio);
-        window.MEDIA_ELEMENT_NODES.set(window.audioPlayer.audio, this.src);
-        window.analyser = window.audioCtx.createAnalyser();
-        window.analyser.connect(window.audioCtx.destination);
-        window.analyser.fftSize = 2048;//2048
-      }
-
-      this.src.connect(window.analyser);
-
-      bufferLength = window.analyser.frequencyBinCount;
-      dataArray = new Uint8Array(bufferLength);
-      barWidth = (canvas.width / bufferLength);
-      document.getElementById("visu").style.cursor = "none";
-
-      this.animate();
-    }
-
-    function overallLoudess(array) {
-      var sum = 0;
-      var start = array.length * 0;
-      var stop = array.length * 1;
-      for (var i = start; i < stop; i++) {
-        sum += parseInt(array[i]);
-      }
-      lowFreq(array);
-      midFreq(array);
-      highFreq(array);
-      cursorFreq(array);
-      return frequency.overall = sum / array.length
-    }
-
-
-    function cursorFreq(array) {
-      var sum = 0;
-      var start = array.length * 0;
-      var stop = array.length * 0.390625;
-      for (var i = start; i < stop; i++) {
-        sum += parseInt(array[i]);
-      }
-
-      frequency.cursor = sum / (stop - start);
-      return frequency.cursor
-    }
-
-    function highFreq(array) {
-      var sum = 0;
-      var start = array.length * 0.5419921875;
-      var stop = array.length * 0.9326171875;
-      for (var i = start; i < stop; i++) {
-        sum += parseInt(array[i]);
-      }
-
-      frequency.high = sum / (stop - start);
-      return frequency.high
-    }
-
-    function midFreq(array) {
-      var sum = 0;
-      var start = array.length * 0.140625;
-      var stop = array.length * 0.3466796875;
-      for (var i = start; i < stop; i++) {
-        sum += parseInt(array[i]);
-      }
-
-      frequency.mid = sum / (stop - start);
-      return frequency.mid
-    }
-
-    function lowFreq(array) {
-      var sum = 0;
-      var start = array.length * 0;
-      var stop = array.length * 0.107421875;
-      for (var i = start; i < stop; i++) {
-        sum += parseInt(array[i]);
-      }
-
-      frequency.low = sum / (stop - start);
-      return frequency.low
     }
 
     var cursorSize = 112;
@@ -368,7 +272,6 @@ class Audiovisualizer extends Component {
 
     //Animate all the css elements needed
     function updateBackground() {
-
       //backgroundFilter.scale = 1 + frequency.low / 2000;
       backgroundFilter.scale = 1;
 
@@ -393,6 +296,31 @@ class Audiovisualizer extends Component {
 
       document.getElementById("background").style.transform = "scale(" + backgroundFilter.scale + ")";
     }
+
+     // Init
+     if (window.playing) {
+      if (window.audioCtx == undefined) {
+        window.audioCtx = new AudioContext();
+      }
+
+      if (window.MEDIA_ELEMENT_NODES.has(window.audioPlayer.audio)) {
+        this.src = window.MEDIA_ELEMENT_NODES.get(window.audioPlayer.audio);
+      } else {
+        this.src = window.audioCtx.createMediaElementSource(window.audioPlayer.audio);
+        window.MEDIA_ELEMENT_NODES.set(window.audioPlayer.audio, this.src);
+        window.analyser = window.audioCtx.createAnalyser();
+        window.analyser.connect(window.audioCtx.destination);
+        window.analyser.fftSize = 2048;//2048
+      }
+      this.src.connect(window.analyser);
+
+      bufferLength = window.analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      barWidth = (canvas.width / bufferLength);
+      document.getElementById("visu").style.cursor = "none";
+
+      this.animate();
+    }
   }
 
   componentWillUnmount() {
@@ -403,8 +331,7 @@ class Audiovisualizer extends Component {
   render() {
     return (
       <div className='visu' id='visu'>
-        <img src="https://imgur.com/download/6oA8BAV" id="cursorImg" />
-
+        <img src={cursor} id="cursorImg" />
 
         <div id="blurFilter" className="background filter">
           <div id="saturateFilter" className="background filter">
@@ -413,7 +340,6 @@ class Audiovisualizer extends Component {
             </div>
           </div>
         </div>
-
 
         <div id="brightnessFilterLeft" className="brightnessFilter"></div>
         <div id="brightnessFilterRight" className="brightnessFilter"></div>

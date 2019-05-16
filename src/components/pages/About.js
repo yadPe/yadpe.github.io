@@ -7,7 +7,7 @@ const About = (props) => {
             <h1>About</h1>
             <Grid container spacing={24} style={{ padding: 24, width: '100%' }}>
 
-                <Grid item xs={12} sm={6} lg={3} xl={2}>
+                <Grid item xs={12}  >
 
                 </Grid>
 
