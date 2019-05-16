@@ -18,24 +18,25 @@ import ReactAplayer from 'react-aplayer';
 const reqSongs = require.context('../assets', true, /\.mp3$/);
 const reqCovers = require.context('../assets', true, /\.jpg$/);
 
-const styles = {
-  list: {
-    width: 250,
-  },
-  fullList: {
-    width: 'auto',
-  },
+const style = {
+
+    position: 'relative',
+    top: 100,
+
+
 };
 
 class MusicControlPanel extends React.Component {
   state = {
     top: false,
     nowPlaying: null,
+    y: -1000,
   };
 
   togglePanel = (side, open) => () => {
     this.setState({
       [side]: open,
+      y: open ? 0 : -1000,
     });
   };
 
@@ -43,6 +44,8 @@ class MusicControlPanel extends React.Component {
     const { requestColorTheme } = this.props;
     //this.colorThief = new ColorThief();
     this.ap = ap;
+    this.ap.options.container.parentNode.parentNode.parentNode.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+    this.ap.options.container.parentNode.parentNode.parentNode.style.boxShadow = 'none';
     window.audioPlayer = ap;
 
     //console.log(reqSongs('./jinja.mp3', true))
@@ -116,6 +119,8 @@ class MusicControlPanel extends React.Component {
   };
 
   render() {
+
+    //const { classes } = this.props;
 
     const fullList = (
       <div className={'fullList'}>
