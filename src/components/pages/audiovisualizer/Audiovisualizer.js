@@ -277,7 +277,7 @@ class Audiovisualizer extends Component {
 
       backgroundFilter.brightness = 0.3 + ((frequency.high / 100) * 1.1);
 
-      backgroundFilter.borderOpacity = 0 + ((frequency.high / 100) * 0.35);
+      backgroundFilter.borderOpacity = 0 + ((frequency.high / 100) * 0.20);
 
       backgroundFilter.bottomOpacity = 0 + ((frequency.overall / 100) * 1);
 

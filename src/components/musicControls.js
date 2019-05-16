@@ -95,7 +95,7 @@ class MusicControlPanel extends React.Component {
         name: 'artcore JINJA',
         artist: 'An',
         url: reqSongs('./jinja.mp3', true),
-        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/jinja.jpg?raw=true',
+        cover: reqCovers('./jinja.jpg', true),
         lrc: '',
         theme: 'rgb(163, 136, 100)'
       },
@@ -103,7 +103,7 @@ class MusicControlPanel extends React.Component {
         name: 'Marigold feat. Guriri',
         artist: 'M2U',
         url: reqSongs('./marigold.mp3', true),
-        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/marigold.jpg?raw=true',
+        cover: reqCovers('./marigold.jpg', true),
         lrc: '',
         theme: 'rgb(241, 228, 199)'
       },
@@ -111,7 +111,15 @@ class MusicControlPanel extends React.Component {
         name: 'Routing',
         artist: 'Camellia',
         url: reqSongs('./routing.mp3', true),
-        cover: 'https://github.com/yadPe/yadpe.github.io/blob/master/src/assets/routing.jpg?raw=true',
+        cover: reqCovers('./routing.jpg', true),
+        lrc: '',
+        theme: 'rgb(233, 192, 215)'
+      },
+      {
+        name: 'Before My Body Is Dry (tomatomerde remix)',
+        artist: 'tomatomerde',
+        url: reqSongs('./Before_my_body_is_dry_(tomatomerde remix).mp3', true),
+        cover: reqCovers('./Before_my_body_is_dry_(tomatomerde remix).jpg', true),
         lrc: '',
         theme: 'rgb(233, 192, 215)'
       }
