@@ -12,7 +12,7 @@ export class Particule {
     }
 
     run() {
-      this.draw();
+      //this.draw();
       this.update();
     }
 

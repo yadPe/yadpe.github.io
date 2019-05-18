@@ -69,14 +69,14 @@ class MusicControlPanel extends React.Component {
 
   onPlay = (e) => {
     console.log('on play');
-    console.log(e.path[0].src);
+    //console.log(e.path[0].src);
     //const songName = this.ap.list.audios.filter(song => song.url === `http://localhost:3000${e.path[0].src}`)[0].name || 'unknown';
     const songName = 'unknown';
 
     this.setState({
       nowPlaying: songName,
     })
-    this.np = e.path.src;
+    //this.np = e.path.src;
     window.playing = true;
   };
 

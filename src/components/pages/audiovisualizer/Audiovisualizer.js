@@ -88,7 +88,7 @@ class Audiovisualizer extends Component {
           window.setTimeout(function () {
 
             callback(+performance.now());
-          }, 1000 / 150); //max fps but capped to screen refreshRate
+          }, 1000 / 60);
         };
     })();
 
@@ -214,9 +214,14 @@ class Audiovisualizer extends Component {
         particules.shift();
       }
 
+      ctx.beginPath();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "red";
+      ctx.lineCap = 'round';
+
       // Animate the bars
       for (var i = 0; i < dataArray.length; i++) { //dataArray.length
-        barHeight = dataArray[i];
+        barHeight = dataArray[i] * 1.5;
         var s = (barHeight / 255) * 100;
         var l = 50;
 
@@ -232,7 +237,7 @@ class Audiovisualizer extends Component {
           if (Math.abs(clientPos.x - x) <= 200) {
             var value = -Math.abs(clientPos.x - x);
             if (value == 0) {
-              ratio = 1;
+              //ratio = 1;
             } else {
               var range = (150 - 1);
               var newRange = (2.77 - 1);
@@ -247,15 +252,24 @@ class Audiovisualizer extends Component {
             }
             effect = i + " x" + ratio;
           }
-          ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)"; //hsv(360°, 73%, 96%)   "rgb(" + r + "," + g + "," + b + ")"
-          ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
+
+
+          //ctx.lineTo(x, canvas.height - (barHeight * ratio));
+          ctx.lineTo(x, canvas.height - (barHeight * ratio) >  canvas.height - 50 ? canvas.height - 50 : canvas.height - (barHeight * ratio));
+
+
+          // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)"; //hsv(360°, 73%, 96%)   "rgb(" + r + "," + g + "," + b + ")"
+          // ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
         }
         else {
-          ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
-          ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          ctx.lineTo(x, canvas.height - barHeight >  canvas.height - 50 ? canvas.height - 50 : canvas.height - barHeight);
+
+          // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
+          // ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         }
         x += barWidth + 1;
       }
+      ctx.stroke();
       //draw Cursor 
       ctx.drawImage(cursor, clientPos.x - cursorSize / 2, clientPos.y - cursorSize / 2, cursorSize, cursorSize);
     }
@@ -297,10 +311,13 @@ class Audiovisualizer extends Component {
       document.getElementById("background").style.transform = "scale(" + backgroundFilter.scale + ")";
     }
 
-     // Init
-     if (window.playing) {
+    // Init
+    if (window.playing) {
       if (window.audioCtx == undefined) {
-        window.audioCtx = new AudioContext();
+        const audioContext = window.AudioContext // Default
+          || window.webkitAudioContext // Safari and old versions of Chrome
+          || false;
+        window.audioCtx = new audioContext();
       }
 
       if (window.MEDIA_ELEMENT_NODES.has(window.audioPlayer.audio)) {
