@@ -122,6 +122,14 @@ class MusicControlPanel extends React.Component {
         cover: reqCovers('./Before_my_body_is_dry_(tomatomerde remix).jpg', true),
         lrc: '',
         theme: 'rgb(233, 192, 215)'
+      },
+      {
+        name: 'illanai-assorted',
+        artist: 't+pazolite',
+        url: reqSongs('./illanai-assorted.mp3', true),
+        cover: reqCovers('./illanai-assorted.jpg', true),
+        lrc: '',
+        theme: 'rgb(233, 192, 215)'
       }
     ]
   };
