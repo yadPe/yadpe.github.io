@@ -19,36 +19,37 @@ class Audiovisualizer extends Component {
     const Yoffset = 50//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
     console.log(Yoffset)
 
-    const particules = [], imgArr = [],
-      particulesSize = { max: 7, min: 4 };
+    const particules = [],
+      imgArr = [],
+      particulesSize = { max: 7, min: 4 },
+      cursor = new Image(),
+      clientPos = {},
+      canvas = document.getElementById('visualizer'),
+      ctx = canvas.getContext("2d"),
+      backgroundFilter = {
+        blur: 3,
+        brightness: 0.75,
+        saturate: 0.75,
+        scale: 1,
+        borderOpacity: 0,
+        bottomOpacity: 0
+      };
 
-   
-    var canvas, ctx, dataArray, bufferLength, barWidth, barHeight;
-    var running = true;
-
-    canvas = document.getElementById('visualizer');
-    ctx = canvas.getContext("2d");
-
-    var effect;
-
-    var frequency = {
-      overall: 0,
-      low: 0,
-      mid: 0,
-      high: 0,
-      cursor: 0
-    }
+    let dataArray,
+      bufferLength,
+      barWidth,
+      barHeight,
+      effect,
+      running = true,
+      frequency = {},
+      canvasWidth,
+      cursorSize = 112,
+      canvasHeight;
 
     //SETUP cursor
-    var cursor = new Image();
     cursor.src = document.getElementById("cursorImg").src;
 
 
-    //Store cursor position
-    var clientPos = {
-      x: undefined,
-      y: undefined
-    }
 
     this.inter = setInterval(resizeEventHandler, 1000);
 
@@ -64,6 +65,8 @@ class Audiovisualizer extends Component {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       barWidth = (canvas.width / bufferLength);
+      canvasWidth = canvas.width;
+      canvasHeight = canvas.height;
       console.log("resizing ", canvas.width, " x ", canvas.height)
     }
     window.onload = () => resizeEventHandler();
@@ -84,20 +87,20 @@ class Audiovisualizer extends Component {
     })();
 
     //idle detect to hide controls
-    var lastMouseSum;
-    var startIdle;
-    var idle;
+    let lastMouseSum,
+      startIdle,
+      idle;
     function mouseIdle(mouse) {
       if (!lastMouseSum) {
         lastMouseSum = mouse.x + mouse.y;
       }
-      var sum = mouse.x + mouse.y;
+      let sum = mouse.x + mouse.y;
       if (sum == lastMouseSum) {
         if (!idle) {
           startIdle = performance.now();
           idle = true;
         } else {
-          var time = performance.now();
+          const time = performance.now();
           if (idle && time - startIdle > 3000) {
             document.getElementById("controls").style.display = "none";
             //console.log("none");
@@ -110,13 +113,13 @@ class Audiovisualizer extends Component {
       }
     }
 
-    var lastLog;
-    var lastRun;//performance.now();
-    var lastFps = [];
-    var x = 0;
+    let lastLog,
+      lastRun,
+      lastFps = [],
+      x = 0;
 
     function averageFps(fpsArray) {
-      var sum = 0;
+      let sum = 0;
       for (let i = 0; i < fpsArray.length; i++) {
         sum += parseInt(fpsArray[i]);
       }
@@ -124,9 +127,11 @@ class Audiovisualizer extends Component {
       return Math.round(sum / fpsArray.length)
     }
 
-    var h; //hue
-    var lastOverallLoudness; //loudness -100ms
-    var deltaLoudness;
+    let h, //hue
+      lastOverallLoudness, //loudness -100ms
+      deltaLoudness,
+      delta,
+      FPS;
 
     this.animate = () => {
       // State and fps counter //
@@ -135,9 +140,9 @@ class Audiovisualizer extends Component {
         this.req = window.requestAnimFrame(this.animate);
         return;
       }
-      var delta = (performance.now() - lastRun) / 1000;
+      delta = (performance.now() - lastRun) / 1000;
       lastRun = performance.now();
-      var FPS = Math.round(1 / delta);
+      FPS = Math.round(1 / delta);
       lastFps.push(FPS);
 
       if (running) {
@@ -148,7 +153,7 @@ class Audiovisualizer extends Component {
       if (!lastLog) {
         lastLog = performance.now();
       }
-      var currentTime = performance.now();
+      const currentTime = performance.now();
       if (currentTime - lastLog > 100) {
         //console.log(frequency);
         //console.log(deltaLoudness);
@@ -181,11 +186,13 @@ class Audiovisualizer extends Component {
         //addParticules(1);
       }
 
-
-
-
-
       // Updates the bars color
+
+      let sum = dataArray.reduce((previous, current) => current += previous),
+        avg = sum / dataArray.length,
+        s = (avg) * 100,
+        l = 50;
+
       if (!h) {
         h = 0;
       }
@@ -194,6 +201,7 @@ class Audiovisualizer extends Component {
       } else {
         h = 0;
       }
+
 
       // Updates particules
       for (i = 0; i < particules.length; i++) {
@@ -206,30 +214,25 @@ class Audiovisualizer extends Component {
         particules.shift();
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       ctx.beginPath();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "red";
+      ctx.strokeStyle = "hsla(" + h + "," + s + "%," + 25 + "%, 1)";
       ctx.lineCap = 'round';
 
-      ctx.fillStyle = "rgba(200, 20, 20, 0.4)";
+      ctx.fillStyle = "hsla(" + h + "," + s + "%," + l + "%, 0.3)";;
 
       // go back to the left of the screen
       x = 0;
       // Animate the bars
       for (var i = 0; i < dataArray.length; i++) { //dataArray.length
         barHeight = dataArray[i] * 1.5;
-        var s = (barHeight / 255) * 100;
-        var l = 50;
 
-        if (clientPos.y - canvas.height / 2 > 0) {
-          var deltaX = clientPos.x - x;
-          var deltaY = clientPos.y - canvas.height / 2;
-          var value = clientPos.y - canvas.height / 2
-          var range = (canvas.height - 0);
-          var newRange = (2 - 1);
-          let ratio = (((value - 0) * newRange) / range) + 1;
+
+        if (clientPos.y - canvasHeight / 2 > 0) {
+          const deltaX = clientPos.x - x, deltaY = clientPos.y - canvasHeight / 2;
+          let ratio = convertRange(clientPos.y - canvasHeight / 2, canvasHeight, 0, 2, 1)
 
           //idk what ive done here but it works guys
           if (Math.abs(clientPos.x - x) <= 200) {
@@ -237,13 +240,12 @@ class Audiovisualizer extends Component {
             if (value == 0) {
               //ratio = 1;
             } else {
-              var range = (150 - 1);
-              var newRange = (2.77 - 1);
-              var epiic = (((value - 0) * newRange) / range) + 2.77;
+              const range = (150 - 1), newRange = (2.77 - 1);
+              let epiic = (((value - 0) * newRange) / range) + 2.77;
               if (epiic < 1) {
                 epiic = 1;
               }
-              var masterRoyal = (epiic * (deltaY / (canvas.height)) + 0.4);
+              const masterRoyal = (epiic * (deltaY / (canvasHeight)) + 0.4);
               if (masterRoyal >= 1) {
                 ratio *= masterRoyal;
               }
@@ -251,38 +253,27 @@ class Audiovisualizer extends Component {
             effect = i + " x" + ratio;
           }
 
-
           //ctx.lineTo(x, canvas.height - (barHeight * ratio));
-          ctx.lineTo(x, canvas.height - (barHeight * ratio) > canvas.height - 50 ? canvas.height - 50 : canvas.height - (barHeight * ratio));
+          ctx.lineTo(x, canvasHeight - (barHeight * ratio) > canvasHeight - 50 ? canvasHeight - 50 : canvasHeight - (barHeight * ratio));
 
 
           // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)"; //hsv(360°, 73%, 96%)   "rgb(" + r + "," + g + "," + b + ")"
           // ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
         }
         else {
-          ctx.lineTo(x, canvas.height - barHeight > canvas.height - 50 ? canvas.height - 50 : canvas.height - barHeight);
+          ctx.lineTo(x, canvasHeight - barHeight > canvasHeight - 50 ? canvasHeight - 50 : canvasHeight - barHeight);
 
           //ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
           // ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         }
         x += barWidth + 1;
       }
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.lineTo(0, canvas.height);
+      ctx.lineTo(canvasWidth, canvasHeight);
+      ctx.lineTo(0, canvasHeight);
       ctx.stroke();
       ctx.fill();
       //draw Cursor 
       ctx.drawImage(cursor, clientPos.x - cursorSize / 2, clientPos.y - cursorSize / 2, cursorSize, cursorSize);
-    }
-
-    var cursorSize = 112;
-    var backgroundFilter = {
-      blur: 3,
-      brightness: 0.75,
-      saturate: 0.75,
-      scale: 1,
-      borderOpacity: 0,
-      bottomOpacity: 0
     }
 
     //Animate all the css elements needed
@@ -336,7 +327,7 @@ class Audiovisualizer extends Component {
 
       bufferLength = window.analyser.frequencyBinCount;
       dataArray = new Uint8Array(bufferLength);
-      barWidth = (canvas.width / bufferLength);
+      barWidth = (canvasWidth / bufferLength);
       document.getElementById("visu").style.cursor = "none";
 
       this.animate();
@@ -371,7 +362,7 @@ class Audiovisualizer extends Component {
         </span>
 
         <canvas id="visualizer"></canvas>
-        <video id="video" muted></video>
+        <canvas id="particles"></canvas>
       </div>
     );
   }

@@ -130,6 +130,14 @@ class MusicControlPanel extends React.Component {
         cover: reqCovers('./illanai-assorted.jpg', true),
         lrc: '',
         theme: 'rgb(233, 192, 215)'
+      },
+      {
+        name: 'Alexandrite',
+        artist: 'onoken',
+        url: reqSongs('./alexandrite.mp3', true),
+        cover: reqCovers('./alexandrite.jpg', true),
+        lrc: '',
+        theme: 'rgb(233, 192, 215)'
       }
     ]
   };
