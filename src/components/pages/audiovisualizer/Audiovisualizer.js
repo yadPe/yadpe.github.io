@@ -19,19 +19,10 @@ class Audiovisualizer extends Component {
     const Yoffset = 50//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
     console.log(Yoffset)
 
-    var particules = [];
+    const particules = [], imgArr = [],
+      particulesSize = { max: 7, min: 4 };
 
-    function addParticules(n) {
-      for (let i = 0; i < n; i++) {
-        var x = randomNum(10, window.innerWidth - 10);
-        var y = randomNum(window.innerHeight + 10, window.innerHeight + 100);
-        var dx = randomNum(-0.8, 0.8);
-        var speed = randomNum(0.1, 1);
-        var size = Math.floor(randomNum(1, 6));
-        particules.push(new Particule(x, y, dx, -1, size, speed, 1, ctx));
-      }
-    }
-
+   
     var canvas, ctx, dataArray, bufferLength, barWidth, barHeight;
     var running = true;
 
@@ -75,7 +66,7 @@ class Audiovisualizer extends Component {
       barWidth = (canvas.width / bufferLength);
       console.log("resizing ", canvas.width, " x ", canvas.height)
     }
-    document.onreadystatechange = () => resizeEventHandler();
+    window.onload = () => resizeEventHandler();
     window.onresize = () => resizeEventHandler();
 
     window.requestAnimFrame = (function () {
@@ -152,9 +143,6 @@ class Audiovisualizer extends Component {
       if (running) {
         this.req = window.requestAnimFrame(this.animate);
       }
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      x = 0;
 
       // Run every 0.1s - logs and idle handeling //
       if (!lastLog) {
@@ -190,8 +178,12 @@ class Audiovisualizer extends Component {
       if (frequency.overall > 101 || deltaLoudness > 38) {
         h += 1;
         console.log("Jump");
-        addParticules(1);
+        //addParticules(1);
       }
+
+
+
+
 
       // Updates the bars color
       if (!h) {
@@ -210,15 +202,21 @@ class Audiovisualizer extends Component {
         particules[i].run();
       }
 
-      if (particules.length > 500) {
+      if (particules.length > 3500) {
         particules.shift();
       }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.beginPath();
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = "red";
       ctx.lineCap = 'round';
 
+      ctx.fillStyle = "rgba(200, 20, 20, 0.4)";
+
+      // go back to the left of the screen
+      x = 0;
       // Animate the bars
       for (var i = 0; i < dataArray.length; i++) { //dataArray.length
         barHeight = dataArray[i] * 1.5;
@@ -255,21 +253,24 @@ class Audiovisualizer extends Component {
 
 
           //ctx.lineTo(x, canvas.height - (barHeight * ratio));
-          ctx.lineTo(x, canvas.height - (barHeight * ratio) >  canvas.height - 50 ? canvas.height - 50 : canvas.height - (barHeight * ratio));
+          ctx.lineTo(x, canvas.height - (barHeight * ratio) > canvas.height - 50 ? canvas.height - 50 : canvas.height - (barHeight * ratio));
 
 
           // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)"; //hsv(360°, 73%, 96%)   "rgb(" + r + "," + g + "," + b + ")"
           // ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
         }
         else {
-          ctx.lineTo(x, canvas.height - barHeight >  canvas.height - 50 ? canvas.height - 50 : canvas.height - barHeight);
+          ctx.lineTo(x, canvas.height - barHeight > canvas.height - 50 ? canvas.height - 50 : canvas.height - barHeight);
 
-          // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
+          //ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
           // ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
         }
         x += barWidth + 1;
       }
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
       ctx.stroke();
+      ctx.fill();
       //draw Cursor 
       ctx.drawImage(cursor, clientPos.x - cursorSize / 2, clientPos.y - cursorSize / 2, cursorSize, cursorSize);
     }
@@ -310,6 +311,8 @@ class Audiovisualizer extends Component {
 
       document.getElementById("background").style.transform = "scale(" + backgroundFilter.scale + ")";
     }
+
+
 
     // Init
     if (window.playing) {
