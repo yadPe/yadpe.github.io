@@ -12,11 +12,32 @@ class Audiovisualizer extends Component {
   componentDidMount() {
     // This code is absolute trash and not meant to be reused.. Good luck
 
+    window.requestAnimFrame = (function () {
+      return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback, element) {
+          window.setTimeout(function () {
+
+            callback(+performance.now());
+          }, 1000 / 60);
+        };
+    })();
+
+    //Get cursor position
+    window.addEventListener('mousemove',
+      function (event) {
+        clientPos.x = event.x;
+        clientPos.y = event.y - Yoffset;
+      }, false);
+
     if (!window.MEDIA_ELEMENT_NODES) {
       window.MEDIA_ELEMENT_NODES = new WeakMap();
     }
 
-    const Yoffset = 50//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
+    const Yoffset = 0//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
     console.log(Yoffset)
 
     const particules = [],
@@ -26,6 +47,8 @@ class Audiovisualizer extends Component {
       clientPos = {},
       canvas = document.getElementById('visualizer'),
       ctx = canvas.getContext("2d"),
+      particlesCanvas = document.getElementById('particles'),
+      particlesCtx = particlesCanvas.getContext("2d"),
       backgroundFilter = {
         blur: 3,
         brightness: 0.75,
@@ -44,52 +67,45 @@ class Audiovisualizer extends Component {
       frequency = {},
       canvasWidth,
       cursorSize = 112,
-      canvasHeight;
+      canvasHeight,
+      lastLog,
+      lastRun,
+      lastFps = [],
+      x = 0,
+      lastMouseSum,
+      startIdle,
+      idle,
+      h, //hue
+      lastOverallLoudness, //loudness -100ms
+      deltaLoudness,
+      delta,
+      FPS,
+      imageCanvas,
+      iCtx,
+      imageData,
+      imagePixData;
 
     //SETUP cursor
     cursor.src = document.getElementById("cursorImg").src;
 
-
-
     this.inter = setInterval(resizeEventHandler, 1000);
-
-    //Get cursor position
-    window.addEventListener('mousemove',
-      function (event) {
-        clientPos.x = event.x;
-        clientPos.y = event.y - Yoffset;
-      }, false);
-
 
     function resizeEventHandler() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      particlesCanvas.width = window.innerWidth;
+      particlesCanvas.height = window.innerHeight;
       barWidth = (canvas.width / bufferLength);
       canvasWidth = canvas.width;
       canvasHeight = canvas.height;
+      //addParticules(1000);
+
       console.log("resizing ", canvas.width, " x ", canvas.height)
     }
     window.onload = () => resizeEventHandler();
     window.onresize = () => resizeEventHandler();
 
-    window.requestAnimFrame = (function () {
-      return window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (callback, element) {
-          window.setTimeout(function () {
-
-            callback(+performance.now());
-          }, 1000 / 60);
-        };
-    })();
-
     //idle detect to hide controls
-    let lastMouseSum,
-      startIdle,
-      idle;
     function mouseIdle(mouse) {
       if (!lastMouseSum) {
         lastMouseSum = mouse.x + mouse.y;
@@ -113,11 +129,6 @@ class Audiovisualizer extends Component {
       }
     }
 
-    let lastLog,
-      lastRun,
-      lastFps = [],
-      x = 0;
-
     function averageFps(fpsArray) {
       let sum = 0;
       for (let i = 0; i < fpsArray.length; i++) {
@@ -127,11 +138,25 @@ class Audiovisualizer extends Component {
       return Math.round(sum / fpsArray.length)
     }
 
-    let h, //hue
-      lastOverallLoudness, //loudness -100ms
-      deltaLoudness,
-      delta,
-      FPS;
+
+    function addParticules(n) {
+      for (let i = 0; i < n; i++) {
+        const index = Math.floor(randomNum(0, imgArr.length));
+
+        particules.push({
+          x: randomNum(10, canvas.width - 10),
+          y: randomNum(canvas.height + 10, canvas.height + 100),
+          speed: randomNum(0.1, 0.5),
+          dx: randomNum(-0.8, 0.8),
+          dy: -1,
+          alpha: 1,
+          width: imgArr[index].width,
+          height: imgArr[index].height,
+          data: imgArr[index].data
+        });
+      }
+    }
+
 
     this.animate = () => {
       // State and fps counter //
@@ -140,6 +165,7 @@ class Audiovisualizer extends Component {
         this.req = window.requestAnimFrame(this.animate);
         return;
       }
+
       delta = (performance.now() - lastRun) / 1000;
       lastRun = performance.now();
       FPS = Math.round(1 / delta);
@@ -204,18 +230,65 @@ class Audiovisualizer extends Component {
 
 
       // Updates particules
-      for (i = 0; i < particules.length; i++) {
-        particules[i].alpha = i / particules.length;
-        particules[i].speed = particules[i].ogSpeed * convertRange(frequency.high, 255, 0, 5.5, 0.15);
-        particules[i].run();
-      }
+      // for (i = 0; i < particules.length; i++) {
+      //   particules[i].alpha = i / particules.length;
+      //   particules[i].speed = particules[i].ogSpeed * convertRange(frequency.high, 255, 0, 5.5, 0.15);
+      //   particules[i].run();
+      // }
 
       if (particules.length > 3500) {
         particules.shift();
       }
 
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+      particlesCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+
+      // create new Image data
+      const canvasData = particlesCtx.createImageData(canvas.width, canvas.height),
+        // get the pixel data
+        cData = canvasData.data;
+
+      // iterate over the opbects
+      for (let nObject = 0; nObject < particules.length; nObject++) {
+        // for ref the entity
+        const entity = particules[nObject];
+
+        entity.x += entity.dx * entity.speed;
+        entity.y += entity.dy * entity.speed;
+
+        // now iterate over the image we stored
+        for (let w = 0; w < entity.width; w++) {
+          for (let h = 0; h < entity.height; h++) {
+            // make sure the edges of the image are still inside the canvas
+            if (
+              entity.x + w < canvasWidth &&
+              entity.x + w > 0 &&
+              entity.y + h > 0 &&
+              entity.y + h < canvasHeight
+            ) {
+              // get the position pixel from the image canvas
+              const iData = (h * entity.width + w) * 4;
+              // get the position of the data we will write to on our main canvas
+              const pData = (~~(entity.x + w) + ~~(entity.y + h) * canvasWidth) * 4;
+
+              // copy the r/g/b/ and alpha values to our main canvas from
+              // our image canvas data.
+
+              if (entity.data[iData + 3] > 160) {
+                cData[pData] = entity.data[iData];
+                cData[pData + 1] = entity.data[iData + 1];
+                cData[pData + 2] = entity.data[iData + 2];
+                cData[pData + 3] = convertRange(nObject, particules.length, 0, 255, 0);
+              }
+            }
+          }
+        }
+      }
+
+      particlesCtx.putImageData(canvasData, 0, 0);
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.beginPath();
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = "hsla(" + h + "," + s + "%," + 25 + "%, 1)";
@@ -254,14 +327,14 @@ class Audiovisualizer extends Component {
           }
 
           //ctx.lineTo(x, canvas.height - (barHeight * ratio));
-          ctx.lineTo(x, canvasHeight - (barHeight * ratio) > canvasHeight - 50 ? canvasHeight - 50 : canvasHeight - (barHeight * ratio));
+          ctx.lineTo(x, canvasHeight - (barHeight * ratio) > canvasHeight - 1 ? canvasHeight - 1 : canvasHeight - (barHeight * ratio));
 
 
           // ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)"; //hsv(360°, 73%, 96%)   "rgb(" + r + "," + g + "," + b + ")"
           // ctx.fillRect(x, canvas.height - (barHeight * ratio), barWidth, barHeight * ratio);
         }
         else {
-          ctx.lineTo(x, canvasHeight - barHeight > canvasHeight - 50 ? canvasHeight - 50 : canvasHeight - barHeight);
+          ctx.lineTo(x, canvasHeight - barHeight > canvasHeight - 1 ? canvasHeight - 1 : canvasHeight - barHeight);
 
           //ctx.fillStyle = "hsl(" + h + "," + s + "%," + l + "%)";;
           // ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
@@ -306,6 +379,32 @@ class Audiovisualizer extends Component {
 
 
     // Init
+    imageCanvas = document.createElement("canvas");
+    iCtx = imageCanvas.getContext("2d");
+    for (let i = particulesSize.min; i <= particulesSize.max; i++) {
+      // set the canvas to the size of the image
+      const size = i;
+      imageCanvas.width = size * 2;
+      imageCanvas.height = size * 2;
+
+      // draw the image onto the canvas
+      iCtx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+      iCtx.fillStyle = "rgba(255, 255, 255," + 1 + ")";
+      iCtx.arc(size, size, size, 0, 2 * Math.PI);
+      iCtx.fill();
+
+      // get the ImageData for the image.
+      imageData = iCtx.getImageData(0, 0, size * 2, size * 2);
+      // get the pixel component data from the image Data.
+      imagePixData = imageData.data;
+
+      imgArr.push({
+        data: imagePixData,
+        width: size * 2,
+        height: size * 2
+      });
+    }
+
     if (window.playing) {
       if (window.audioCtx == undefined) {
         const audioContext = window.AudioContext // Default
@@ -329,6 +428,8 @@ class Audiovisualizer extends Component {
       dataArray = new Uint8Array(bufferLength);
       barWidth = (canvasWidth / bufferLength);
       document.getElementById("visu").style.cursor = "none";
+
+      
 
       this.animate();
     }
