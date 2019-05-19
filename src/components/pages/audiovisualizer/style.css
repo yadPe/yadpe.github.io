@@ -3,10 +3,10 @@ body{
 }
 
 canvas{
-    position: absolute;
+    /* position: absolute;
     z-index: -1;
     top: 0;
-    left: 0;
+    left: 0; */
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;
@@ -91,11 +91,11 @@ img{
     display: none;
 }
 
-#video{
+/* #video{
     visibility: visible;
     z-index: -9;
     position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
-}
+} */

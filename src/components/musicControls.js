@@ -138,6 +138,14 @@ class MusicControlPanel extends React.Component {
         cover: reqCovers('./alexandrite.jpg', true),
         lrc: '',
         theme: 'rgb(233, 192, 215)'
+      },
+      {
+        name: "dreamin' feat.Ryu [EXH]",
+        artist: 'Mayumi Morinaga',
+        url: reqSongs('./dreamin_feat.Ryu_[EXH].mp3', true),
+        cover: reqCovers('./dreamin_feat.Ryu_[EXH].jpg', true),
+        lrc: '',
+        theme: 'rgb(233, 192, 215)'
       }
     ]
   };
