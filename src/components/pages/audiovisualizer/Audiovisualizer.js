@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Particule, randomNum, convertRange, overallLoudess } from './audiovisualizerUtils';
+import worker from './worker.js';
+import WebWorker from '../../../webWorker';
 import cursor from './cursor.png';
 import './style.css';
 
@@ -40,6 +42,10 @@ class Audiovisualizer extends Component {
     const Yoffset = 50//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
     console.log(Yoffset)
 
+
+
+
+
     const particules = [],
       imgArr = [],
       particulesSize = { max: 7, min: 4 },
@@ -47,7 +53,7 @@ class Audiovisualizer extends Component {
       clientPos = {},
       canvas = document.getElementById('visualizer'),
       ctx = canvas.getContext("2d"),
-      //particlesCanvas = document.getElementById('particles'),
+      particlesCanvas = document.getElementById('particles'),
       //particlesCtx = particlesCanvas.getContext("2d"),
       backgroundFilter = {
         blur: 3,
@@ -90,6 +96,21 @@ class Audiovisualizer extends Component {
 
     this.inter = setInterval(resizeEventHandler, 1000);
 
+
+
+
+    this.initCanvasWorker = () => {
+      this.worker = new WebWorker(worker);
+      this.worker.onmessage = event => {
+        if (event.data.msg === 'render') {
+          //particlesCtx.transferFromImageBitmap(event.data.bitmap);
+        }
+      };
+
+      this.offscreenCanvas = particlesCanvas.transferControlToOffscreen();
+      this.worker.postMessage({ msg: 'ini', particulesSize, canvas: this.offscreenCanvas }, [this.offscreenCanvas]);
+    }
+
     function resizeEventHandler() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -100,8 +121,10 @@ class Audiovisualizer extends Component {
       canvasHeight = canvas.height;
       //addParticules(1000);
 
+
       console.log("resizing ", canvas.width, " x ", canvas.height)
     }
+
     window.onload = () => resizeEventHandler();
     window.onresize = () => resizeEventHandler();
 
@@ -186,8 +209,8 @@ class Audiovisualizer extends Component {
       if (currentTime - lastLog > 100) {
         //console.log(frequency);
         //console.log(deltaLoudness);
-
-        console.log(effect);
+        this.worker.postMessage('bruuu');
+        //console.log(effect);
         mouseIdle(clientPos);
         //document.getElementById("fps").innerHTML = FPS = averageFps(lastFps);
 
@@ -327,7 +350,7 @@ class Audiovisualizer extends Component {
               }
             }
             effect = i + " x" + ratio;
-            
+
             //window.biquadFilter.gain.value = Math.abs(Math.round(convertRange(clientPos.y, canvasHeight, 0, 100, 0))) * 1;
           }
 
@@ -347,7 +370,7 @@ class Audiovisualizer extends Component {
         x += barWidth + 1;
       }
       window.biquadFilter.frequency.value = convertRange(clientPos.x, canvasWidth, 0, 15000, 50) || 500;
-      window.biquadFilter.Q.value = convertRange(clientPos.y, canvasHeight, canvasHeight/2.5, 1.55, 0) || 0; //1.5
+      window.biquadFilter.Q.value = convertRange(clientPos.y, canvasHeight, canvasHeight / 2.5, 1.45, 0) || 0; //1.5
 
       ctx.lineTo(canvasWidth, canvasHeight);
       ctx.lineTo(0, canvasHeight);
@@ -359,11 +382,11 @@ class Audiovisualizer extends Component {
 
     //Animate all the css elements needed
     const blurFilter = document.getElementById("blurFilter").style,
-    brightnessFilterLeft = document.getElementById("brightnessFilterLeft").style,
-    brightnessFilterRight = document.getElementById("brightnessFilterRight").style,
-    newBrightnessFilter = document.getElementById("newBrightnessFilter").style,
-    saturateFilter = document.getElementById("saturateFilter").style,
-    background = document.getElementById("background").style;
+      brightnessFilterLeft = document.getElementById("brightnessFilterLeft").style,
+      brightnessFilterRight = document.getElementById("brightnessFilterRight").style,
+      newBrightnessFilter = document.getElementById("newBrightnessFilter").style,
+      saturateFilter = document.getElementById("saturateFilter").style,
+      background = document.getElementById("background").style;
 
     function updateBackground() {
       //backgroundFilter.scale = 1 + frequency.low / 2000;
@@ -456,10 +479,10 @@ class Audiovisualizer extends Component {
       window.biquadFilter.detune.value = 5;
       window.biquadFilter.Q.value = 0;
 
-      
 
-      
 
+
+      this.initCanvasWorker();
       this.animate();
     }
   }
@@ -492,7 +515,7 @@ class Audiovisualizer extends Component {
         </span> */}
 
         <canvas id="visualizer"></canvas>
-        {/* <canvas id="particles"></canvas> */}
+        <canvas id="particles"></canvas>
       </div>
     );
   }
