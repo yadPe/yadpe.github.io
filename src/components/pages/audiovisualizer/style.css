@@ -14,12 +14,18 @@ canvas{
     -ms-interpolation-mode: nearest-neighbor;
 }
 
+
+
 #visu{
     overflow: hidden;
     /* background-color: black; */
     margin: 0;
     color: #ffafe5;
     cursor: auto;
+}
+
+#particles{
+    z-index: -2;
 }
 #controls{
     display: inline-block;

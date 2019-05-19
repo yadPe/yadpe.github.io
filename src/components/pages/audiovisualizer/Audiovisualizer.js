@@ -54,6 +54,7 @@ class Audiovisualizer extends Component {
       canvas = document.getElementById('visualizer'),
       ctx = canvas.getContext("2d"),
       particlesCanvas = document.getElementById('particles'),
+      workerCanvas = document.getElementById('workerCanvas'),
       //particlesCtx = particlesCanvas.getContext("2d"),
       backgroundFilter = {
         blur: 3,
@@ -106,9 +107,13 @@ class Audiovisualizer extends Component {
           //particlesCtx.transferFromImageBitmap(event.data.bitmap);
         }
       };
-
       this.offscreenCanvas = particlesCanvas.transferControlToOffscreen();
       this.worker.postMessage({ msg: 'ini', particulesSize, canvas: this.offscreenCanvas }, [this.offscreenCanvas]);
+    }
+
+    const resizeWorker = (width, height) => {
+      if (this.worker)
+      this.worker.postMessage({msg: 'resize', newSize: {width, height}})
     }
 
     function resizeEventHandler() {
@@ -116,12 +121,15 @@ class Audiovisualizer extends Component {
       canvas.height = window.innerHeight;
       //particlesCanvas.width = window.innerWidth;
       //particlesCanvas.height = window.innerHeight;
+      //workerCanvas.height = window.innerHeight;
+      //workerCanvas.width = window.innerWidth;
       barWidth = (canvas.width / bufferLength);
       canvasWidth = canvas.width;
       canvasHeight = canvas.height;
       //addParticules(1000);
 
-
+      resizeWorker(canvasWidth, canvasHeight);
+      
       console.log("resizing ", canvas.width, " x ", canvas.height)
     }
 
@@ -516,6 +524,7 @@ class Audiovisualizer extends Component {
 
         <canvas id="visualizer"></canvas>
         <canvas id="particles"></canvas>
+        <canvas id="workerCanvas"></canvas>
       </div>
     );
   }

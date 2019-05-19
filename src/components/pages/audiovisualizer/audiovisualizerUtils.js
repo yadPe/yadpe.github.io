@@ -32,11 +32,9 @@ export class Particule {
     }
   }
 
-  export function randomNum(min, max) {
-    return Math.random() * (max - min) + min;
-  }
+  export const randomNum = (min, max) => Math.random() * (max - min) + min;
 
-  export function convertRange(OldValue, OldMax, OldMin, NewMax, NewMin) {
+  export const convertRange = (OldValue, OldMax, OldMin, NewMax, NewMin) => {
     return (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
   }
 
