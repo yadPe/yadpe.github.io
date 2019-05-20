@@ -97,7 +97,7 @@ export default () => {
 
         particlesToAnimate = particles.length;
 
-        if (particlesToAnimate > 3500) {
+        if (particlesToAnimate > 2000) {
             particles.shift();
             particlesToAnimate = particles.length;
           }

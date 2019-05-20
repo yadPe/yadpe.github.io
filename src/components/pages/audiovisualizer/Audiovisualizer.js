@@ -114,7 +114,7 @@ class Audiovisualizer extends Component {
 
 
       Yoffset = 0//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 50;
-      const container = document.getElementById('visu');
+      //const container = document.getElementById('visu');
 
       const width = window.innerWidth;
       const height = window.innerHeight - Yoffset;
@@ -169,34 +169,6 @@ class Audiovisualizer extends Component {
         idle = false;
       }
     }
-
-    // function averageFps(fpsArray) {
-    //   let sum = 0;
-    //   for (let i = 0; i < fpsArray.length; i++) {
-    //     sum += parseInt(fpsArray[i]);
-    //   }
-    //   lastFps = [];
-    //   return Math.round(sum / fpsArray.length)
-    // }
-
-
-    // function addParticules(n) {
-    //   for (let i = 0; i < n; i++) {
-    //     const index = Math.floor(randomNum(0, imgArr.length));
-
-    //     particules.push({
-    //       x: randomNum(10, canvas.width - 10),
-    //       y: randomNum(canvas.height + 10, canvas.height + 100),
-    //       speed: randomNum(0.1, 0.5),
-    //       dx: randomNum(-0.8, 0.8),
-    //       dy: -1,
-    //       alpha: 1,
-    //       width: imgArr[index].width,
-    //       height: imgArr[index].height,
-    //       data: imgArr[index].data
-    //     });
-    //   }
-    // }
 
 
     this.animate = () => {
@@ -273,67 +245,9 @@ class Audiovisualizer extends Component {
         h = 0;
       }
 
+      // Update particles speed
+      this.worker.postMessage({msg: 'updateSpeedRatio', newRatio: convertRange(frequency.high, 255, 0, 15, 0.15)});
 
-      // Updates particules
-      // for (i = 0; i < particules.length; i++) {
-      //   particules[i].alpha = i / particules.length;
-      //   particules[i].speed = particules[i].ogSpeed * convertRange(frequency.high, 255, 0, 5.5, 0.15);
-      //   particules[i].run();
-      // }
-
-      // if (particules.length > 3500) {
-      //   particules.shift();
-      // }
-
-      this.worker.postMessage({msg: 'updateSpeedRatio', newRatio: convertRange(frequency.high, 255, 0, 5.5, 0.15)});
-
-
-      // particlesCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-
-      // // create new Image data
-      // const canvasData = particlesCtx.createImageData(canvas.width, canvas.height),
-      //   // get the pixel data
-      //   cData = canvasData.data;
-
-      // // iterate over the opbects
-      // for (let nObject = 0; nObject < particules.length; nObject++) {
-      //   // for ref the entity
-      //   const entity = particules[nObject];
-
-      //   entity.x += entity.dx * entity.speed;
-      //   entity.y += entity.dy * entity.speed;
-
-      //   // now iterate over the image we stored
-      //   for (let w = 0; w < entity.width; w++) {
-      //     for (let h = 0; h < entity.height; h++) {
-      //       // make sure the edges of the image are still inside the canvas
-      //       if (
-      //         entity.x + w < canvasWidth &&
-      //         entity.x + w > 0 &&
-      //         entity.y + h > 0 &&
-      //         entity.y + h < canvasHeight
-      //       ) {
-      //         // get the position pixel from the image canvas
-      //         const iData = (h * entity.width + w) * 4;
-      //         // get the position of the data we will write to on our main canvas
-      //         const pData = (~~(entity.x + w) + ~~(entity.y + h) * canvasWidth) * 4;
-
-      //         // copy the r/g/b/ and alpha values to our main canvas from
-      //         // our image canvas data.
-
-      //         if (entity.data[iData + 3] > 160) {
-      //           cData[pData] = entity.data[iData];
-      //           cData[pData + 1] = entity.data[iData + 1];
-      //           cData[pData + 2] = entity.data[iData + 2];
-      //           cData[pData + 3] = convertRange(nObject, particules.length, 0, 255, 0);
-      //         }
-      //       }
-      //     }
-      //   }
-      // }
-
-      // particlesCtx.putImageData(canvasData, 0, 0);
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.beginPath();
@@ -419,6 +333,8 @@ class Audiovisualizer extends Component {
 
       backgroundFilter.bottomOpacity = 0 + ((frequency.overall / 100) * 1);
 
+      backgroundFilter.blur = convertRange(frequency.high, 255, 0, 3, 0.22) //  0.2// + ((frequency.high / 100) * 1.5);
+
       cursorSize = 96 + frequency.cursor * 0.5;
 
       blurFilter.filter = "blur(" + backgroundFilter.blur + "px)";
@@ -436,34 +352,7 @@ class Audiovisualizer extends Component {
     }
 
 
-
-    // Init
-    // imageCanvas = document.createElement("canvas");
-    // iCtx = imageCanvas.getContext("2d");
-    // for (let i = particulesSize.min; i <= particulesSize.max; i++) {
-    //   // set the canvas to the size of the image
-    //   const size = i;
-    //   imageCanvas.width = size * 2;
-    //   imageCanvas.height = size * 2;
-
-    //   // draw the image onto the canvas
-    //   iCtx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
-    //   iCtx.fillStyle = "rgba(255, 255, 255," + 1 + ")";
-    //   iCtx.arc(size, size, size, 0, 2 * Math.PI);
-    //   iCtx.fill();
-
-    //   // get the ImageData for the image.
-    //   imageData = iCtx.getImageData(0, 0, size * 2, size * 2);
-    //   // get the pixel component data from the image Data.
-    //   imagePixData = imageData.data;
-
-    //   imgArr.push({
-    //     data: imagePixData,
-    //     width: size * 2,
-    //     height: size * 2
-    //   });
-    // }
-
+    // init
     if (window.playing) {
       if (window.audioCtx == undefined) {
         const audioContext = window.AudioContext // Default
@@ -534,7 +423,7 @@ class Audiovisualizer extends Component {
       <div className='visu' id='visu'>
         <img src={cursor} id="cursorImg" />
 
-        <div id="blurFilter" className="background filter"></div>
+        <div id="blurFilter" className="background filter">
         <div id="saturateFilter" className="background filter"></div>
         <div id="newBrightnessFilter" className="background filter"></div>
         <div id="background" className="background"></div>
@@ -551,8 +440,10 @@ class Audiovisualizer extends Component {
           <span id="fps"></span>
         </span> */}
 
-        <canvas id="visualizer"></canvas>
+        
         <canvas id="particles"></canvas>
+        </div>
+        <canvas id="visualizer"></canvas>
         {/* <canvas id="workerCanvas"></canvas> */}
       </div>
     );
