@@ -6,9 +6,8 @@ export default () => {
     const convertRange = (OldValue, OldMax, OldMin, NewMax, NewMin) => {
       return (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
     }
-
     
-    let canvas, ctx, canvasHeight = 800, canvasWidth = 800, particlesToAnimate;
+    let canvas, ctx, canvasHeight = 800, canvasWidth = 800, particlesToAnimate, speedRatio = 1;
     const imgArr = [], particles = [];
     console.log('worker: ini')
 
@@ -17,13 +16,15 @@ export default () => {
         const data = e.data;
         switch (message) {
             case 'ini':
-                init(data)
+                init(data);
             case 'addParticles':
-                addParticles(data.amount)
+                addParticles(data.amount);
             case 'resize':
-                resizeCanvas(data.newSize)
+                resizeCanvas(data.newSize);
+            case 'updateSpeedRatio':
+              speedRatio = data.newRatio;
             default:
-                postMessage({ error: `Unknown command: '${message}'` })
+                postMessage({ error: `Unknown command: '${message}'` });
         }
     });
 
@@ -39,7 +40,7 @@ export default () => {
     }
 
     const resizeCanvas = size => {
-        console.log(`${JSON.stringify(size.height)} size`)
+        //console.log(`${JSON.stringify(size.height)} size`)
         canvas.height = canvasHeight = size.height;
         canvas.width = canvasWidth = size.width;
     }
@@ -69,14 +70,14 @@ export default () => {
                 height: size * 2
             });
         }
-        console.log(`Worker: done sprite creation, sprite generated: ${imgArr.length}`)
+        console.log(`Worker: done sprite calculation, sprite generated: ${imgArr.length}`)
         return true
     }
 
     const addParticles = n => {
         for (let i = 0; i < n; i++) {
             const index = Math.floor(randomNum(0, imgArr.length));
-            console.log(`adding ${n} particles`)
+            console.log(`worker: adding ${n} particles`)
             particles.push({
                 x: randomNum(10, canvas.width - 10),
                 y: randomNum(canvas.height + 10, canvas.height + 100),
@@ -114,8 +115,8 @@ export default () => {
           // for ref the entity
           const entity = particles[nObject];
 
-          entity.x += entity.dx * entity.speed;
-          entity.y += entity.dy * entity.speed;
+          entity.x += (entity.dx * entity.speed) * speedRatio;
+          entity.y += (entity.dy * entity.speed) * speedRatio;
 
           // now iterate over the image we stored
           for (let w = 0; w < entity.width; w++) {
@@ -152,8 +153,8 @@ export default () => {
         //ctx.fillRect(10,10, 100, 100)
 
         //postMessage({msg: 'render', bitmap});
-        console.log('rendering');
-        addParticles(2);
+        //console.log('rendering');
+        //addParticles(2);
         requestAnimationFrame(render);
     }
 }

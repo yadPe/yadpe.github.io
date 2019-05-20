@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Particule, randomNum, convertRange, overallLoudess } from './audiovisualizerUtils';
+import { randomNum, convertRange, overallLoudess } from './audiovisualizerUtils';
 import worker from './worker.js';
 import WebWorker from '../../../webWorker';
 import cursor from './cursor.png';
@@ -28,19 +28,12 @@ class Audiovisualizer extends Component {
         };
     })();
 
-    //Get cursor position
-    window.addEventListener('mousemove',
-      function (event) {
-        clientPos.x = event.x;
-        clientPos.y = event.y - Yoffset;
-      }, false);
+
 
     if (!window.MEDIA_ELEMENT_NODES) {
       window.MEDIA_ELEMENT_NODES = new WeakMap();
     }
 
-    const Yoffset = 50//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 100;
-    console.log(Yoffset)
 
 
 
@@ -90,12 +83,13 @@ class Audiovisualizer extends Component {
       imageCanvas,
       iCtx,
       imageData,
-      imagePixData;
+      imagePixData,
+      Yoffset = 50;
 
     //SETUP cursor
     cursor.src = document.getElementById("cursorImg").src;
 
-    this.inter = setInterval(resizeEventHandler, 1000);
+    //this.inter = setInterval( () => this.resizeEventHandler(), 1000);
 
 
 
@@ -113,28 +107,44 @@ class Audiovisualizer extends Component {
 
     const resizeWorker = (width, height) => {
       if (this.worker)
-      this.worker.postMessage({msg: 'resize', newSize: {width, height}})
+        this.worker.postMessage({ msg: 'resize', newSize: { width, height } })
     }
 
-    function resizeEventHandler() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    this.resizeEventHandler = () => {
+
+
+      Yoffset = 0//document.getElementsByClassName('MuiToolbar-root-39 MuiToolbar-dense-42 MuiToolbar-gutters-40')[0].getBoundingClientRect().height || 50;
+      const container = document.getElementById('visu');
+
+      const width = window.innerWidth;
+      const height = window.innerHeight - Yoffset;
+
+      canvas.width = canvasWidth = width;
+      canvas.height = canvasHeight = height;
+
+
+
+
+
+      // console.log('ressssss')
+      // canvas.width = window.innerWidth;
+      // canvas.height = window.innerHeight;
       //particlesCanvas.width = window.innerWidth;
       //particlesCanvas.height = window.innerHeight;
       //workerCanvas.height = window.innerHeight;
       //workerCanvas.width = window.innerWidth;
-      barWidth = (canvas.width / bufferLength);
-      canvasWidth = canvas.width;
-      canvasHeight = canvas.height;
+      barWidth = (width / bufferLength);
+      // canvasWidth = canvas.width;
+      // canvasHeight = canvas.height;
       //addParticules(1000);
 
-      resizeWorker(canvasWidth, canvasHeight);
-      
-      console.log("resizing ", canvas.width, " x ", canvas.height)
+      resizeWorker(width, height);
+
+      //console.log("resizing ", canvas.width, " x ", canvas.height)
     }
 
-    window.onload = () => resizeEventHandler();
-    window.onresize = () => resizeEventHandler();
+    window.onload = () => this.resizeEventHandler();
+    window.onresize = () => this.resizeEventHandler();
 
     //idle detect to hide controls
     function mouseIdle(mouse) {
@@ -244,6 +254,7 @@ class Audiovisualizer extends Component {
         h += 1;
         console.log("Jump");
         //addParticules(1);
+        this.worker.postMessage({msg: 'addParticles', amount: 1})
       }
 
       // Updates the bars color
@@ -270,9 +281,11 @@ class Audiovisualizer extends Component {
       //   particules[i].run();
       // }
 
-      if (particules.length > 3500) {
-        particules.shift();
-      }
+      // if (particules.length > 3500) {
+      //   particules.shift();
+      // }
+
+      this.worker.postMessage({msg: 'updateSpeedRatio', newRatio: convertRange(frequency.high, 255, 0, 5.5, 0.15)});
 
 
       // particlesCtx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -489,29 +502,45 @@ class Audiovisualizer extends Component {
 
 
 
+      //Get cursor position
+      window.addEventListener('mousemove',
+        function (event) {
+          clientPos.x = event.x;
+          clientPos.y = event.y - Yoffset;
+        }, false);
 
       this.initCanvasWorker();
+      this.resizeEventHandler()
       this.animate();
     }
+
   }
+
+  // componentDidUpdate(_prevProps, _prevState) {
+  //   this.resizeEventHandler();
+  // }
 
   componentWillUnmount() {
     window.cancelAnimationFrame(this.req);
-    clearInterval(this.inter);
+    //clearInterval(this.inter);
   }
 
   render() {
+    // if (this.resizeEventHandler){
+
+    //   this.resizeEventHandler();
+    // }
     return (
       <div className='visu' id='visu'>
         <img src={cursor} id="cursorImg" />
 
-        <div id="blurFilter" className="background filter">
-          <div id="saturateFilter" className="background filter">
-            <div id="newBrightnessFilter" className="background filter">
-              <div id="background" className="background"></div>
-            </div>
-          </div>
-        </div>
+        <div id="blurFilter" className="background filter"></div>
+        <div id="saturateFilter" className="background filter"></div>
+        <div id="newBrightnessFilter" className="background filter"></div>
+        <div id="background" className="background"></div>
+
+
+
 
         <div id="brightnessFilterLeft" className="brightnessFilter"></div>
         <div id="brightnessFilterRight" className="brightnessFilter"></div>
@@ -524,7 +553,7 @@ class Audiovisualizer extends Component {
 
         <canvas id="visualizer"></canvas>
         <canvas id="particles"></canvas>
-        <canvas id="workerCanvas"></canvas>
+        {/* <canvas id="workerCanvas"></canvas> */}
       </div>
     );
   }
