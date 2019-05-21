@@ -146,6 +146,14 @@ class MusicControlPanel extends React.Component {
         cover: reqCovers('./dreamin_feat.Ryu_[EXH].jpg', true),
         lrc: '',
         theme: 'rgb(233, 192, 215)'
+      },
+      {
+        name: "World Fragments III",
+        artist: 'Xi',
+        url: reqSongs('./world_fragments_III.mp3', true),
+        cover: reqCovers('./world_fragments_III.jpg', true),
+        lrc: '',
+        theme: 'rgb(233, 192, 215)'
       }
     ]
   };
