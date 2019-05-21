@@ -142,7 +142,6 @@ class Audiovisualizer extends Component {
       }
       const currentTime = performance.now();
       if (currentTime - lastLog > 100) {
-        this.worker.postMessage('bruuu');
         mouseIdle(clientPos);
         lastLog = performance.now();
         lastOverallLoudness = frequency.overall;
@@ -192,7 +191,7 @@ class Audiovisualizer extends Component {
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = "hsla(" + h + "," + s + "%," + 25 + "%, 1)";
       ctx.lineCap = 'round';
-      ctx.fillStyle = "hsla(" + h + "," + s + "%," + l + "%, 0.3)";;
+      ctx.fillStyle = "hsla(" + h + "," + s + "%," + l + "%, 1)";;
 
       // go back to the left of the screen
       x = 0;
@@ -200,7 +199,7 @@ class Audiovisualizer extends Component {
       for (var i = 0; i < dataArray.length; i++) { //dataArray.length
         barHeight = dataArray[i] * 1.5;
         if (clientPos.y - canvasHeight / 2 > 0) {
-          const deltaX = clientPos.x - x, deltaY = clientPos.y - canvasHeight / 2;
+          const deltaY = clientPos.y - canvasHeight / 2;
           let ratio = convertRange(clientPos.y - canvasHeight / 2, canvasHeight, 0, 2, 1)
 
           //idk what ive done here but it works guys

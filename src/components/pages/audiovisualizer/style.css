@@ -27,6 +27,7 @@ canvas{
 
 #visualizer{
     z-index: -1;
+    opacity: 0.5;
 }
 #particles{
     z-index: -2;

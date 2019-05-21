@@ -17,35 +17,40 @@ export default () => {
         switch (message) {
             case 'ini':
                 init(data);
+                break;
             case 'addParticles':
                 addParticles(data.amount);
+                break;
             case 'resize':
                 resizeCanvas(data.newSize);
+                break;
             case 'updateSpeedRatio':
               speedRatio = data.newRatio;
+              break;
             default:
                 postMessage({ error: `Unknown command: '${message}'` });
+                console.error(`Unknown command: '${message}'`);
+                break;
         }
     });
 
     const init = async data => {
         console.log('Worker: received init ')
         canvas = data.canvas;
-        canvas.height = 800;
-        canvas.width = 800;
+        canvas.height = canvasHeight;
+        canvas.width = canvasWidth;
         ctx = canvas.getContext("2d");
         await createSprites(data.particulesSize);
         render();
-        console.log('Worker: done init ')
+        console.log('Worker: init done')
     }
 
     const resizeCanvas = size => {
-        //console.log(`${JSON.stringify(size.height)} size`)
         canvas.height = canvasHeight = size.height;
         canvas.width = canvasWidth = size.width;
     }
 
-    const createSprites = (range) => {
+    const createSprites = range => {
         console.log('Worker: begin sprite creation')
         for (let i = range.min; i <= range.max; i++) {
             // set the canvas to the size of the image
@@ -77,10 +82,9 @@ export default () => {
     const addParticles = n => {
         for (let i = 0; i < n; i++) {
             const index = Math.floor(randomNum(0, imgArr.length));
-            console.log(`worker: adding ${n} particles`)
             particles.push({
-                x: randomNum(10, canvas.width - 10),
-                y: randomNum(canvas.height + 10, canvas.height + 100),
+                x: randomNum(10, canvasWidth - 10),
+                y: randomNum(canvasHeight + 10, canvasHeight + 100),
                 speed: randomNum(0.1, 0.5),
                 dx: randomNum(-0.8, 0.8),
                 dy: -1,
@@ -92,7 +96,7 @@ export default () => {
         }
     }
 
-    const render = time => {
+    const render = () => {
         // ... some drawing using the gl context ...
 
         particlesToAnimate = particles.length;
@@ -103,7 +107,6 @@ export default () => {
           }
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
 
         // create new Image data
         const canvasData = ctx.createImageData(canvasWidth, canvasHeight),
@@ -146,15 +149,7 @@ export default () => {
             }
           }
         }
-
         ctx.putImageData(canvasData, 0, 0);
-        // //const bitmap = ctx.canvas.transferToImageBitmap();
-
-        //ctx.fillRect(10,10, 100, 100)
-
-        //postMessage({msg: 'render', bitmap});
-        //console.log('rendering');
-        //addParticles(2);
         requestAnimationFrame(render);
     }
 }
