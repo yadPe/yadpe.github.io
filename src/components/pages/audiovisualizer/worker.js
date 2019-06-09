@@ -83,10 +83,10 @@ export default () => {
         for (let i = 0; i < n; i++) {
             const index = Math.floor(randomNum(0, imgArr.length));
             particles.push({
-                x: randomNum(10, canvasWidth - 10),
+                x: randomNum(canvasWidth / 2 - 300, canvasWidth / 2 + 300),
                 y: randomNum(canvasHeight + 10, canvasHeight + 100),
                 speed: randomNum(0.1, 0.5),
-                dx: randomNum(-0.8, 0.8),
+                dx: randomNum(-1.3, 1.3),
                 dy: -1,
                 alpha: 1,
                 width: imgArr[index].width,

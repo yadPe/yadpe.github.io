@@ -4,27 +4,37 @@ import Project from '../Project';
 import { projects_db } from '../../projects_db';
 
 const Projects = (props) => {
-    return (
-        <div>
-            <Grid
-                container
-                spacing={0}
-                direction="column"
-                alignItems="center"
-                justify="center"
-                style={{ padding: 24}}>
+  const style = {
+    background: '#121212'
+  }
+  return (
+    <div style={style}>
+      <Grid
+        container
+        spacing={5}
+        justify="center"
+        style={{ width: '100%' }}
+      >
 
-                {projects_db.map(project => (
-                    <Grid item xs={12} sm={10} lg={8} xl={7}>
-                    <Project title={project.titre} description={project.description} cover={project.cover} link={project.link}/>
-                </Grid>
-                ))}
 
-                
 
-            </Grid>
-        </div>
-    )
+        <Grid item lg={12} align="center">
+          <Project  />
+        </Grid>
+
+        {projects_db.map(project => (
+
+          <Grid item lg={5} align="center">
+            <Project title={project.titre} description={project.description} cover={project.cover} link={project.link} />
+          </Grid>
+
+        ))}
+
+
+
+      </Grid>
+    </div>
+  )
 }
 
 export default Projects;

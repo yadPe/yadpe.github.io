@@ -3,7 +3,7 @@ import { randomNum, convertRange, overallLoudess } from './audiovisualizerUtils'
 import worker from './worker.js';
 import WebWorker from '../../../webWorker';
 import cursor from './cursor.png';
-import './style.css';
+import './style.scss';
 
 class Audiovisualizer extends Component {
   constructor(props) {
@@ -12,6 +12,7 @@ class Audiovisualizer extends Component {
   }
 
   componentDidMount() {
+    document.body.style.overflow = 'hidden';
     // This code is absolute trash and not meant to be reused.. Good luck
 
     window.requestAnimFrame = (function () {
@@ -28,12 +29,13 @@ class Audiovisualizer extends Component {
         };
     })();
 
+
     if (!window.MEDIA_ELEMENT_NODES) {
       window.MEDIA_ELEMENT_NODES = new WeakMap();
     }
 
     const particulesSize = { max: 7, min: 4 },
-      cursor = new Image(),
+      //cursor = new Image(),
       clientPos = {},
       canvas = document.getElementById('visualizer'),
       ctx = canvas.getContext("2d"),
@@ -68,7 +70,7 @@ class Audiovisualizer extends Component {
       Yoffset = 50;
 
     //SETUP cursor
-    cursor.src = document.getElementById("cursorImg").src;
+    const cursor = document.getElementById("cursorImg");
 
     this.initCanvasWorker = () => {
       this.worker = new WebWorker(worker);
@@ -79,6 +81,11 @@ class Audiovisualizer extends Component {
       };
       this.offscreenCanvas = particlesCanvas.transferControlToOffscreen();
       this.worker.postMessage({ msg: 'ini', particulesSize, canvas: this.offscreenCanvas }, [this.offscreenCanvas]);
+    }
+
+    this.getMousePos = event => {
+      clientPos.x = event.x;
+      clientPos.y = event.y - Yoffset;
     }
 
     const resizeWorker = (width, height) => {
@@ -182,16 +189,15 @@ class Audiovisualizer extends Component {
       }
 
       // Update particles speed
-      this.worker.postMessage({ msg: 'updateSpeedRatio', newRatio: convertRange(frequency.high, 255, 0, 20, 0.20) });
-
+      this.worker.postMessage({ msg: 'updateSpeedRatio', newRatio: convertRange(frequency.high, 255, 0, 25, 0.30) });
 
       // Begin rendering
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.beginPath();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "hsla(" + h + "," + s + "%," + 25 + "%, 1)";
+      ctx.strokeStyle = "hsla(" + h + "," + s + "%," + 25 + "%, " +  convertRange(frequency.overall, 255, 0, 1, 0.5) + ")";
       ctx.lineCap = 'round';
-      ctx.fillStyle = "hsla(" + h + "," + s + "%," + l + "%, 1)";;
+      ctx.fillStyle = "hsla(" + h + "," + s + "%," + 50 + "%, " +  convertRange(frequency.overall, 255, 0, 1, 0.2) + ")";
 
       // go back to the left of the screen
       x = 0;
@@ -249,10 +255,10 @@ class Audiovisualizer extends Component {
     function updateBackground() {
       //backgroundFilter.scale = 1 + frequency.low / 2000;
       backgroundFilter.scale = 1;
-      backgroundFilter.brightness = 0.3 + ((frequency.high / 100) * 1.1);
+      backgroundFilter.brightness = convertRange(frequency.high, 255, 0, 2.5, 0.5)
       backgroundFilter.borderOpacity = 0 + ((frequency.high / 100) * 0.20);
-      backgroundFilter.bottomOpacity = 0 + ((frequency.overall / 100) * 1);
-      backgroundFilter.blur = convertRange(frequency.high, 255, 0, 3, 0.22) //  0.2// + ((frequency.high / 100) * 1.5);
+      backgroundFilter.bottomOpacity = 0 //+ ((frequency.overall / 100) * 1);
+      backgroundFilter.blur = convertRange(frequency.high, 255, 0, 5, 0.22) //  0.2// + ((frequency.high / 100) * 1.5);
 
       cursorSize = 96 + frequency.cursor * 0.5;
 
@@ -270,7 +276,6 @@ class Audiovisualizer extends Component {
       background.transform = "scale(" + backgroundFilter.scale + ")";
     }
 
-
     // init
     if (window.playing) {
       if (window.audioCtx == undefined) {
@@ -286,13 +291,12 @@ class Audiovisualizer extends Component {
         this.src = window.audioCtx.createMediaElementSource(window.audioPlayer.audio);
         window.MEDIA_ELEMENT_NODES.set(window.audioPlayer.audio, this.src);
         window.analyser = window.audioCtx.createAnalyser();
-        window.analyser.connect(window.audioCtx.destination);
-        window.analyser.fftSize = 2048;//2048
-
+        window.analyser.fftSize = 2048;
         window.gainNode = window.audioCtx.createGain();
         window.biquadFilter = window.audioCtx.createBiquadFilter();
       }
 
+      window.analyser.connect(window.audioCtx.destination);
       window.gainNode.connect(window.analyser);
       window.biquadFilter.connect(window.gainNode);
       this.src.connect(window.biquadFilter);
@@ -308,14 +312,8 @@ class Audiovisualizer extends Component {
       window.biquadFilter.detune.value = 5;
       window.biquadFilter.Q.value = 0;
 
-
-
       //Get cursor position
-      window.addEventListener('mousemove',
-        function (event) {
-          clientPos.x = event.x;
-          clientPos.y = event.y - Yoffset;
-        }, false);
+      window.addEventListener('mousemove', this.getMousePos, false);
 
       this.initCanvasWorker();
       this.resizeEventHandler()
@@ -325,35 +323,30 @@ class Audiovisualizer extends Component {
   }
 
   componentWillUnmount() {
+    document.body.style.overflow = 'auto';
     window.cancelAnimationFrame(this.req);
+    window.removeEventListener('mousemove', this.getMousePos, false);
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+    }
   }
 
   render() {
     return (
       <div className='visu' id='visu'>
         <img src={cursor} id="cursorImg" />
-
         <div id="blurFilter" className="background filter">
-          <div id="saturateFilter" className="background filter"></div>
-          <div id="newBrightnessFilter" className="background filter"></div>
-          <div id="background" className="background"></div>
-
-
-
-
-          <div id="brightnessFilterLeft" className="brightnessFilter"></div>
-          <div id="brightnessFilterRight" className="brightnessFilter"></div>
-
-          <div id="background" className="background"></div>
-
-          {/* <span id="controls">
-          <span id="fps"></span>
-        </span> */}
-
-
-          <canvas id="particles"></canvas>
+          <div id="newBrightnessFilter" className="background filter">
+            <div id="saturateFilter" className="background filter" />
+            <div id="background" className="background" />
+            <div id="brightnessFilterLeft" className="brightnessFilter" />
+            <div id="brightnessFilterRight" className="brightnessFilter" />
+            <div id="background" className="background" />
+            <canvas id="particles" />
+          </div>
         </div>
-        <canvas id="visualizer"></canvas>
+        <canvas id="visualizer" />
       </div>
     );
   }

@@ -6,6 +6,7 @@ import Home from './components/pages/Home';
 import About from './components/pages/About';
 import Projects from './components/pages/Projects';
 import Audiovisualizer from './components/pages/audiovisualizer/Audiovisualizer';
+import HideAppBar from './components/newBar'
 import './App.css';
 
 class App extends Component {
@@ -25,15 +26,24 @@ class App extends Component {
 
     const theme = createMuiTheme({
       palette: {
+        type: "dark",
         primary: {
-          main: primaryColor,
+          light: '#fff',
+          main: 'rgb(23, 105, 170)',
+          dark: '#000'
+        },
+        secondary: {
+          main: '#f44336',
         },
       },
+      typography: {
+        useNextVariants: true
+      }
     });
     return (
       <div className="App">
         <MuiThemeProvider theme={theme}>
-          <Navbar requestColorTheme={this.getSongColorTheme} />
+          <HideAppBar requestColorTheme={this.getSongColorTheme} />
           <Switch>
             <Route exact path='/' component={Home} />
             <Route path="/about" component={About} />
