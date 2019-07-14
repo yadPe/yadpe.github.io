@@ -1,0 +1,35 @@
+.aplayer {
+    background: #303030;
+}
+
+.aplayer .aplayer-info .aplayer-music .aplayer-author {
+    font-size: 12px;
+    color: #e2e2e2;
+}
+
+.aplayer .aplayer-list ol li .aplayer-list-author {
+    color: #e2e2e2;
+    float: right;
+    cursor: pointer;
+}
+
+.aplayer .aplayer-list ol li.aplayer-list-light {
+    background: #1d1d1d;
+}
+
+.aplayer .aplayer-list ol li:hover {
+    background: #1d1d1d;
+}
+
+.aplayer .aplayer-list ol li {
+    position: relative;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 15px;
+    font-size: 12px;
+    border-top: 1px solid #000000;
+    cursor: pointer;
+    transition: all .2s ease;
+    overflow: hidden;
+    margin: 0;
+}

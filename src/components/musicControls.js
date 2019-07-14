@@ -14,6 +14,7 @@ import Typography from '@material-ui/core/Typography';
 import LibraryMusic from '@material-ui/icons/LibraryMusic';
 import ReactAplayer from 'react-aplayer';
 //import ColorThief from '../color-thief';
+import './player.css'
 
 const reqSongs = require.context('../assets', true, /\.mp3$/);
 const reqCovers = require.context('../assets', true, /\.jpg$/);
@@ -43,10 +44,14 @@ class MusicControlPanel extends React.Component {
   onInit = ap => {
     const { requestColorTheme } = this.props;
     //this.colorThief = new ColorThief();
-    this.ap = ap;
-    this.ap.options.container.parentNode.parentNode.parentNode.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-    this.ap.options.container.parentNode.parentNode.parentNode.style.boxShadow = 'none';
-    window.audioPlayer = ap;
+    if (!window.audioPlayer){
+      window.audioPlayer = ap;
+      window.audioPlayer.options.container.parentNode.parentNode.parentNode.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+      window.audioPlayer.options.container.parentNode.parentNode.parentNode.style.boxShadow = 'none';
+    }
+
+
+    //window.audioPlayer = ap;
 
     //console.log(reqSongs('./jinja.mp3', true))
 
@@ -70,7 +75,7 @@ class MusicControlPanel extends React.Component {
   onPlay = (e) => {
     console.log('on play');
     //console.log(e.path[0].src);
-    //const songName = this.ap.list.audios.filter(song => song.url === `http://localhost:3000${e.path[0].src}`)[0].name || 'unknown';
+    //const songName = window.ap.list.audios.filter(song => song.url === `http://localhost:3000${e.path[0].src}`)[0].name || 'unknown';
     const songName = 'unknown';
 
     this.setState({
@@ -89,7 +94,8 @@ class MusicControlPanel extends React.Component {
 
   playerSettings = {
     theme: '#F57F17',
-    lrcType: 3,
+    lrcType: 0,
+    backgroundColor: '#000',
     audio: [
       {
         name: 'artcore JINJA',
@@ -182,7 +188,7 @@ class MusicControlPanel extends React.Component {
           </Typography>
         </Button>
 
-        <Drawer anchor="top" open={this.state.top} onClose={this.togglePanel('top', false)}>
+        <Drawer anchor="top" open={this.state.top} onClose={this.togglePanel('top', false)} disablePortal={true}>
           <div
             tabIndex={0}
             role="button"

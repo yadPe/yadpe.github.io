@@ -40,7 +40,7 @@ export default withRouter(function HideAppBar(props) {
           <Button onClick={() => { history.push('/') }}>Home</Button>
           <Button onClick={() => { history.push('/projects') }}>Project</Button>
           <Button onClick={() => { history.push('/audiovisualizer') }}>About</Button>
-          <MusicControlPanel requestColorTheme={requestColorTheme}/>
+          <MusicControlPanel requestColorTheme={requestColorTheme} disablePortal={true}/>
         </Toolbar>
         </AppBar>
       </HideOnScroll>
